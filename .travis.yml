@@ -22,7 +22,7 @@ script:
   - docker tag udagram-api-feed wawerudev/udagram-api-feed:latest
   - docker tag udagram-api-user wawerudev/udagram-api-user:latest
   - docker tag udagram-frontend wawerudev/udagram-frontend:latest
-  - docker tag reverseproxy wawerudev/reverseproxy:latest
+  - docker tag reverseproxy wawerudev/udagram-reverseproxy:latest
 # Push
 # Assuming DOCKER_PASSWORD and DOCKER_USERNAME are set in the Travis repository settings
 after_success:
@@ -30,4 +30,4 @@ after_success:
   - docker push wawerudev/udagram-api-feed:latest
   - docker push wawerudev/udagram-api-user:latest
   - docker push wawerudev/udagram-frontend:latest
-  - docker push wawerudev/reverseproxy:latest
+  - docker push wawerudev/udagram-reverseproxy:latest

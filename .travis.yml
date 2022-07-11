@@ -6,23 +6,54 @@ env:
   - DOCKER_COMPOSE_VERSION=1.25.5
 
 before_install:
-  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  # install docker
+  - docker -v && docker-compose -v
   - sudo rm /usr/local/bin/docker-compose
-  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname
+    -s`-`uname -m` > docker-compose
   - chmod +x docker-compose
   - sudo mv docker-compose /usr/local/bin
-  - docker -v
-  - docker-compose version --short
-  - curl --silent --location "https://github.com/weaveworks/eksctl/releases/download/latest_release/eksctl_$(uname -s)_amd64.tar.gz" | tar xf -C /tmp
-  - sudo mv /tmp/eksctl /usr/local/bin
-  - eksctl version  
+
+  # install kubenetes
   - curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
   - chmod +x ./kubectl
   - sudo mv ./kubectl /usr/local/bin/kubectl
-  - kubectl version --short --client
 
-install:
-  - docker-compose -f ./docker-compose-build.yaml build --parallel 
-  - docker-compose -f ./docker-compose-build.yaml push
+  # aws authenticator
+  - curl -o aws-iam-authenticator https://amazon-eks.s3.us-west-2.amazonaws.com/1.15.10/2020-02-22/bin/linux/amd64/aws-iam-authenticator
+  - chmod +x ./aws-iam-authenticator
+  - sudo mv ./aws-iam-authenticator /usr/local/bin/
+  - aws-iam-authenticator version
 
+  # cluster config
+  - mkdir -p ${HOME}/.kube
+  - cp udagram-deployment/kubeconfig-template.yaml ${HOME}/.kube/config
+  - export KUBECONFIG=${HOME}/.kube/config
+  - kubectl config set clusters.kubernetes.certificate-authority-data "$CERTIFICATE"
+  - kubectl config set clusters.kubernetes.server "$ENDPOINT"
+  - kubectl get deployments
+  - kubectl version
 
+jobs:
+  include:
+    - stage: dockerize
+      script:
+        - docker-compose -f docker-compose-build.yaml build --parallel
+        - echo "$DOCKER_HUB_PASSWORD" | docker login -u "$DOCKER_HUB_LOGIN" --password-stdin
+        - docker-compose -f docker-compose-build.yaml push
+        - echo "$DOCKER_HUB_PASSWORD" | docker login -u "$DOCKER_HUB_LOGIN" --password-stdin
+        - docker-compose -f docker-compose-build.yaml push
+
+    - stage: aws_eks_deploy
+      script:
+        - kubectl apply -f ./udagram-api-feed/backend-feed-service.yaml
+        - kubectl apply -f ./udagram-api-feed/backend-user-service.yaml
+        - kubectl apply -f ./udagram-frontend/frontend-service.yaml
+        - kubectl apply -f ./udagram-reverseproxy/reverseproxy-service.yaml
+        - kubectl apply -f aws-secret.yaml
+        - kubectl apply -f env-configmap.yaml
+        - kubectl apply -f env-secret.yaml
+        - kubectl apply -f ./udagram-api-feed/backend-feed-deployment.yaml
+        - kubectl apply -f ./udagram-api-user/backend-user-deployment.yaml
+        - kubectl apply -f ./udagram-frontend/frontend-deployment.yaml
+        - kubectl apply -f ./udagram-reverseproxy/reverseproxy-deployment.yaml

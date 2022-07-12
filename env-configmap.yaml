@@ -7,7 +7,8 @@ data:
   JWT_SECRET: helloworld
   DB_NAME: udagramdev
   DB_HOST: udagramdev.c2sfibmjnlch.us-east-1.rds.amazonaws.com
-  ACCESS_CONTROL_ALLOW_ORIGIN: http://localhost:8100
+  ACCESS_CONTROL_ALLOW_ORIGIN: a05dc816cc32e456297d54f605b36d6f-327305395.us-east-2.elb.amazonaws.com
+  URL: a05dc816cc32e456297d54f605b36d6f-327305395.us-east-2.elb.amazonaws.com:8080
 metadata:
   name: env-config
   

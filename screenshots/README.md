@@ -42,12 +42,12 @@ kubectl describe services
 kubectl describe hpa
 ```
 
-![horizontal scaling](kubectl describe hpa.png)
+![horizontal scaling](kubectl_describe_hpa.png)
 
 * To verify that you have set up logging with a backend application
 ```bash
 kubectl logs {pod_name}
 ```
-![backend-feed pod log](kubectl logs backend-feed.png)
+![backend-feed pod log](kubectl_logs_backend-feed.png)
 
-![backend-user pod log](kubectl logs backend-user.png)
+![backend-user pod log](kubectl_logs_backend-user.png)

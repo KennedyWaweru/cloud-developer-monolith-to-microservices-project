@@ -21,6 +21,7 @@ import cors from 'cors';
   const allowedOrigins = [
     'http://localhost:8100', // local development
     'http://localhost:4200',
+    'a8d255f2f313d46a8b85bca808b6e91e-126029186.us-east-2.elb.amazonaws.com:8080', // nginx reverse proxy
     'http://my-080220473863-bucket.s3-website-us-east-1.amazonaws.com' // ionic frontend on s3 bucket
   ];
   const options : cors.CorsOptions = {
